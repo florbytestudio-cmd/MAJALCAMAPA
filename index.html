@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Majalca Campo · FlorByte</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  /* ── Respaldo CSS completo por si Tailwind CDN no carga offline ── */
+  :root {
+    --bg:      #0d1117;
+    --surface: #161b22;
+    --border:  #30363d;
+    --accent:  #3fb950;
+    --warn:    #f85149;
+    --muted:   #8b949e;
+    --text:    #e6edf3;
+    --pine:    #56d364;
+    --oak:     #d29922;
+    --cabin:   #58a6ff;
+    --fire:    #ff7b72;
+    --bbq:     #ffa657;
+    --road:    #a5d6ff;
+    --other:   #d2a8ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-logo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .header-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent);
+    color: #000;
+    border-radius: 20px;
+    padding: 2px 10px;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  /* Layout */
+  .main { max-width: 540px; margin: 0 auto; padding: 16px; }
+  .section { margin-bottom: 20px; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* Card surface */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  /* GPS capture button */
+  .btn-gps {
+    width: 100%;
+    min-height: 64px;
+    background: var(--accent);
+    color: #000;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: opacity 0.15s, transform 0.1s;
+    -webkit-user-select: none;
+  }
+  .btn-gps:active { opacity: 0.8; transform: scale(0.98); }
+  .btn-gps:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Coords display */
+  .coords-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .coord-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .coord-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .coord-value {
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+
+  /* Accuracy chip */
+  .accuracy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 8px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* Category buttons */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .cat-btn {
+    min-height: 48px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-user-select: none;
+  }
+  .cat-btn.selected {
+    background: color-mix(in srgb, var(--cat-color) 15%, transparent);
+    border-color: var(--cat-color);
+    color: var(--cat-color);
+  }
+  .cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--cat-color);
+    flex-shrink: 0;
+  }
+
+  /* Textarea */
+  .field-textarea {
+    width: 100%;
+    min-height: 72px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 15px;
+    padding: 12px;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .field-textarea:focus { border-color: var(--accent); }
+  .field-textarea::placeholder { color: var(--muted); }
+
+  /* Save button */
+  .btn-save {
+    width: 100%;
+    min-height: 52px;
+    background: #21262d;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s, border-color 0.15s;
+    -webkit-user-select: none;
+  }
+  .btn-save:hover, .btn-save:active { background: #30363d; border-color: var(--accent); }
+  .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Export buttons */
+  .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn-export {
+    min-height: 52px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 8px;
+    transition: background 0.15s;
+    -webkit-user-select: none;
+  }
+  .btn-export-kml { background: #0d1b2a; color: #58a6ff; border-color: #1f6feb; }
+  .btn-export-kml:hover { background: #111d2e; }
+  .btn-export-csv { background: #1b1f0d; color: #56d364; border-color: #2ea043; }
+  .btn-export-csv:hover { background: #1e2410; }
+  .btn-export-danger { background: #1b0d0d; color: var(--warn); border-color: #6e1010; }
+  .btn-export-danger:hover { background: #200f0f; }
+  .btn-export span.ext { font-size: 18px; }
+
+  /* Points list */
+  .points-list { display: flex; flex-direction: column; gap: 8px; }
+  .point-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+    align-items: start;
+  }
+  .point-cat {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .point-notes { font-size: 13px; color: var(--text); margin-top: 2px; }
+  .point-meta { font-size: 11px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .btn-del {
+    min-width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--warn);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-del:hover { background: #1b0d0d; }
+
+  /* Spinner */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 3px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2ea043;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 24px;
+    white-space: nowrap;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast.error { background: var(--warn); }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--warn); }
+  .modal-body { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-modal-cancel {
+    flex: 1; min-height: 48px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-modal-confirm {
+    flex: 1; min-height: 48px;
+    background: var(--warn); border: none;
+    border-radius: 10px; color: #fff;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+
+  /* Collapsible */
+  .collapsible-trigger {
+    width: 100%;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  .collapsible-content { display: block; }
+  .collapsible-content.hidden { display: none; }
+  .chevron { transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <span class="header-logo">FlorByte · Campo</span>
+  <span class="header-title">📍 Majalca</span>
+  <span class="header-count" id="headerCount">0</span>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+  <!-- ── SECCIÓN 1: GPS ── -->
+  <div class="section">
+    <p class="section-label">Captura de Ubicación</p>
+    <div class="card">
+      <button class="btn-gps" id="btnCapture" onclick="captureGPS()">
+        <span id="gpsIcon">🛰️</span>
+        <span id="gpsLabel">CAPTURAR UBICACIÓN ACTUAL</span>
+      </button>
+      <div class="coords-row">
+        <div class="coord-box">
+          <div class="coord-label">Latitud</div>
+          <div class="coord-value" id="dispLat">—</div>
+        </div>
+        <div class="coord-box">
+          <div class="coord-label">Longitud</div>
+          <div class="coord-value" id="dispLon">—</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <span class="accuracy-chip" id="accuracyChip">⊙ Precisión: —</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECCIÓN 2: CATEGORÍA ── -->
+  <div class="section">
+    <p class="section-label">Categoría del Punto</p>
+    <div class="card">
+      <div class="cat-grid" id="catGrid">
+        <!-- Renderizado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECCIÓN 3: NOTAS ── -->
+  <div class="section">
+    <p class="section-label">Notas / Atributos</p>
+    <textarea class="field-textarea" id="fieldNotes"
+      placeholder="Ej: Pino de ~15m altura, tronco 40cm diámetro…"></textarea>
+  </div>
+
+  <!-- ── SECCIÓN 4: GUARDAR ── -->
+  <div class="section">
+    <button class="btn-save" id="btnSave" onclick="savePoint()">
+      ＋ Guardar Punto
+    </button>
+  </div>
+
+  <!-- ── SECCIÓN 5: EXPORTAR ── -->
+  <div class="section">
+    <p class="section-label">Exportar Datos</p>
+    <div class="card">
+      <div class="export-grid" style="margin-bottom:10px;">
+        <button class="btn-export btn-export-kml" onclick="exportKML()">
+          <span class="ext">🌍</span>
+          <span>KML</span>
+          <span style="font-size:10px;font-weight:400;opacity:0.8;">SketchUp / GEarth</span>
+        </button>
+        <button class="btn-export btn-export-csv" onclick="exportCSV()">
+          <span class="ext">📊</span>
+          <span>CSV</span>
+          <span style="font-size:10px;font-weight:400;opacity:0.8;">AutoCAD / Excel</span>
+        </button>
+      </div>
+      <button class="btn-export btn-export-danger" onclick="openClearModal()"
+        style="width:100%; flex-direction:row; gap:8px; min-height:44px; font-size:13px;">
+        🗑️ Limpiar Base de Datos
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SECCIÓN 6: LISTA DE PUNTOS ── -->
+  <div class="section">
+    <div class="card">
+      <button class="collapsible-trigger" onclick="toggleList()">
+        <p class="section-label" style="margin:0;" id="listLabel">Puntos Registrados: 0</p>
+        <span class="chevron open" id="listChevron" style="color:var(--muted); font-size:18px;">⌃</span>
+      </button>
+      <div class="collapsible-content" id="pointsList">
+        <div class="empty-state">
+          <div class="icon">🌲</div>
+          <p>Ningún punto registrado aún.<br>Sal al campo y captura el primero.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ MODAL CONFIRMACIÓN BORRADO ═══ -->
+<div class="modal-backdrop" id="clearModal">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ Limpiar Base de Datos</div>
+    <div class="modal-body">
+      Esta acción eliminará <strong style="color:var(--text)">todos los puntos capturados</strong>
+      de forma permanente. No hay deshacer.<br><br>
+      ¿Confirmas el borrado total?
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeClearModal()">Cancelar</button>
+      <button class="btn-modal-confirm" onclick="clearAllPoints()">Sí, borrar todo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MAJALCA CAMPO · FlorByte Studio
+   Levantamiento topográfico de campo, 100% offline-first
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Estado global ──
+const STORAGE_KEY = 'majalca_puntos_v1';
+let puntos = [];            // Array de puntos en memoria
+let currentLat = null;
+let currentLon = null;
+let selectedCat = null;
+
+// ── Definición de categorías con colores ──
+const CATEGORIES = [
+  { id: 'pino',     label: '🌲 Árbol Pino',       color: '#56d364' },
+  { id: 'encino',   label: '🌳 Árbol Encino',      color: '#d29922' },
+  { id: 'cabana_e', label: '🏠 Cabaña (Esquina)',  color: '#58a6ff' },
+  { id: 'cabana_c', label: '🏠 Cabaña (Centro)',   color: '#79c0ff' },
+  { id: 'fogata',   label: '🔥 Fogata',            color: '#ff7b72' },
+  { id: 'asador',   label: '🍖 Asador',            color: '#ffa657' },
+  { id: 'camino',   label: '🛤️ Camino/Acceso',    color: '#a5d6ff' },
+  { id: 'otro',     label: '📌 Otro',              color: '#d2a8ff' },
+];
+
+// ── Helpers de color por categoría ──
+function colorForCat(catId) {
+  const c = CATEGORIES.find(c => c.id === catId);
+  return c ? c.color : '#8b949e';
+}
+function labelForCat(catId) {
+  const c = CATEGORIES.find(c => c.id === catId);
+  return c ? c.label : catId;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCAL STORAGE — Persistencia Offline
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Lee los puntos guardados en localStorage y los carga en memoria */
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    puntos = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.error('Error leyendo localStorage:', e);
+    puntos = [];
+  }
+}
+
+/** Serializa el array `puntos` a localStorage inmediatamente */
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(puntos));
+  } catch (e) {
+    showToast('Error guardando en memoria local', true);
+    console.error(e);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GEOLOCALIZACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Activa el GPS del dispositivo con máxima precisión satelital */
+function captureGPS() {
+  if (!navigator.geolocation) {
+    showToast('GPS no disponible en este dispositivo', true);
+    return;
+  }
+
+  // Indicador de "buscando satélites"
+  const btn = document.getElementById('btnCapture');
+  const lbl = document.getElementById('gpsLabel');
+  const ico = document.getElementById('gpsIcon');
+  btn.disabled = true;
+  lbl.textContent = 'BUSCANDO SATÉLITES…';
+  ico.innerHTML = '<span class="spinner"></span>';
+
+  navigator.geolocation.getCurrentPosition(
+    // ── Éxito ──
+    function(pos) {
+      currentLat = pos.coords.latitude;
+      currentLon = pos.coords.longitude;
+      const acc   = pos.coords.accuracy;
+
+      document.getElementById('dispLat').textContent = currentLat.toFixed(7);
+      document.getElementById('dispLon').textContent = currentLon.toFixed(7);
+
+      // Color de precisión: verde < 5m, amarillo < 15m, rojo > 15m
+      const accColor = acc < 5 ? '#56d364' : acc < 15 ? '#d29922' : '#f85149';
+      document.getElementById('accuracyChip').innerHTML =
+        `<span style="color:${accColor}">⊙</span> Precisión: ±${acc.toFixed(1)} m`;
+
+      btn.disabled = false;
+      lbl.textContent = 'ACTUALIZAR UBICACIÓN';
+      ico.textContent = '✓';
+      showToast('Ubicación capturada · ±' + acc.toFixed(1) + 'm');
+    },
+    // ── Error ──
+    function(err) {
+      btn.disabled = false;
+      lbl.textContent = 'CAPTURAR UBICACIÓN ACTUAL';
+      ico.textContent = '🛰️';
+      let msg = 'Error GPS: ' + err.message;
+      if (err.code === 1) msg = 'Permiso de ubicación denegado';
+      if (err.code === 3) msg = 'GPS tardó demasiado · Intenta de nuevo';
+      showToast(msg, true);
+    },
+    // ── Opciones: máxima precisión, sin caché ──
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CAPTURA Y GUARDADO DE PUNTOS
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Guarda el punto actual en el array y persiste a localStorage */
+function savePoint() {
+  if (currentLat === null || currentLon === null) {
+    showToast('Primero captura tu ubicación GPS', true);
+    return;
+  }
+  if (!selectedCat) {
+    showToast('Selecciona una categoría', true);
+    return;
+  }
+
+  const notes = document.getElementById('fieldNotes').value.trim();
+  const now   = new Date();
+
+  const punto = {
+    id:        Date.now(),              // ID único basado en timestamp
+    cat:       selectedCat,
+    notas:     notes,
+    lat:       currentLat,
+    lon:       currentLon,
+    timestamp: now.toISOString(),       // ISO 8601 para compatibilidad
+    hora:      now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    fecha:     now.toLocaleDateString('es-MX'),
+  };
+
+  puntos.unshift(punto);   // Insertar al inicio para orden cronológico inverso
+  saveToStorage();
+  renderList();
+  updateCount();
+
+  // Reset del formulario (mantenemos lat/lon para rapidez en campo)
+  document.getElementById('fieldNotes').value = '';
+  showToast('Punto guardado: ' + labelForCat(selectedCat));
+}
+
+/** Elimina un punto individual por su ID */
+function deletePoint(id) {
+  puntos = puntos.filter(p => p.id !== id);
+  saveToStorage();
+  renderList();
+  updateCount();
+  showToast('Punto eliminado');
+}
+
+/** Borra todos los puntos (llamado desde modal de confirmación) */
+function clearAllPoints() {
+  puntos = [];
+  saveToStorage();
+  renderList();
+  updateCount();
+  closeClearModal();
+  showToast('Base de datos limpiada');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDERIZADO DE UI
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Renderiza los botones de categoría */
+function renderCategories() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <button class="cat-btn ${selectedCat === cat.id ? 'selected' : ''}"
+      style="--cat-color:${cat.color}"
+      onclick="selectCat('${cat.id}')">
+      <span class="cat-dot" style="--cat-color:${cat.color}"></span>
+      ${cat.label}
+    </button>
+  `).join('');
+}
+
+/** Selecciona la categoría activa */
+function selectCat(catId) {
+  selectedCat = catId;
+  renderCategories();
+}
+
+/** Renderiza la lista de puntos capturados */
+function renderList() {
+  const container = document.getElementById('pointsList');
+  document.getElementById('listLabel').textContent = `Puntos Registrados: ${puntos.length}`;
+
+  if (puntos.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🌲</div>
+        <p>Ningún punto registrado aún.<br>Sal al campo y captura el primero.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="points-list">` + puntos.map((p, i) => {
+    const color = colorForCat(p.cat);
+    const label = labelForCat(p.cat);
+    const num   = puntos.length - i; // Número secuencial
+    return `
+      <div class="point-item">
+        <div>
+          <div class="point-cat" style="color:${color}">${num}. ${label}</div>
+          ${p.notas ? `<div class="point-notes">${escapeHtml(p.notas)}</div>` : ''}
+          <div class="point-meta">
+            📍 ${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}<br>
+            🕐 ${p.fecha} ${p.hora}
+          </div>
+        </div>
+        <button class="btn-del" onclick="deletePoint(${p.id})" title="Eliminar punto">✕</button>
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+/** Actualiza el contador del header */
+function updateCount() {
+  document.getElementById('headerCount').textContent = puntos.length;
+}
+
+/** Colapsa/expande la lista de puntos */
+function toggleList() {
+  const content = document.getElementById('pointsList');
+  const chevron = document.getElementById('listChevron');
+  content.classList.toggle('hidden');
+  chevron.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPORTACIÓN DE DATOS
+   ═══════════════════════════════════════════════════════════════ */
+
+/**
+ * Genera y descarga un archivo KML válido.
+ * Formato: Longitud,Latitud,0 (estándar KML/Google Earth)
+ * Compatible con SketchUp (vía Google Earth Plugin) y QGIS
+ */
+function exportKML() {
+  if (puntos.length === 0) { showToast('No hay puntos para exportar', true); return; }
+
+  const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+  const placemarks = puntos.map(p => `
+    <Placemark>
+      <name>${escapeXml(labelForCat(p.cat))}</name>
+      <description><![CDATA[Notas: ${p.notas || '—'} | Capturado: ${p.fecha} ${p.hora}]]></description>
+      <Point>
+        <coordinates>${p.lon},${p.lat},0</coordinates>
+      </Point>
+      <ExtendedData>
+        <Data name="Categoria"><value>${escapeXml(p.cat)}</value></Data>
+        <Data name="Fecha_Hora"><value>${p.timestamp}</value></Data>
+      </ExtendedData>
+    </Placemark>`).join('\n');
+
+  const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Majalca Campo · ${fecha}</name>
+    <description>Levantamiento de campo generado con FlorByte Campo App</description>
+${placemarks}
+  </Document>
+</kml>`;
+
+  downloadBlob(kml, `majalca_campo_${fecha}.kml`, 'application/vnd.google-earth.kml+xml');
+  showToast('KML exportado (' + puntos.length + ' puntos)');
+}
+
+/**
+ * Genera y descarga un archivo CSV con BOM UTF-8.
+ * El BOM (0xEF 0xBB 0xBF) asegura que Excel y AutoCAD abran con tildes correctamente.
+ * Columnas: ID,Categoria,Latitud,Longitud,Notas,Fecha_Hora
+ */
+function exportCSV() {
+  if (puntos.length === 0) { showToast('No hay puntos para exportar', true); return; }
+
+  const fecha  = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
+  const header = 'ID,Categoria,Latitud,Longitud,Notas,Fecha_Hora\n';
+  const rows   = puntos.map((p, i) =>
+    [
+      (i + 1),
+      csvEscape(labelForCat(p.cat)),
+      p.lat.toFixed(8),
+      p.lon.toFixed(8),
+      csvEscape(p.notas || ''),
+      `${p.fecha} ${p.hora}`
+    ].join(',')
+  ).join('\n');
+
+  // BOM UTF-8 para compatibilidad con Excel y AutoCAD
+  const bom  = '\uFEFF';
+  const csv  = bom + header + rows;
+
+  downloadBlob(csv, `majalca_campo_${fecha}.csv`, 'text/csv;charset=utf-8;');
+  showToast('CSV exportado (' + puntos.length + ' puntos)');
+}
+
+/** Crea un Blob y fuerza la descarga en el navegador */
+function downloadBlob(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL DE CONFIRMACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+
+function openClearModal()  { document.getElementById('clearModal').classList.add('open'); }
+function closeClearModal() { document.getElementById('clearModal').classList.remove('open'); }
+
+// Cerrar modal al tocar el backdrop
+document.getElementById('clearModal').addEventListener('click', function(e) {
+  if (e.target === this) closeClearModal();
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST DE NOTIFICACIONES
+   ═══════════════════════════════════════════════════════════════ */
+
+let toastTimer;
+/** Muestra un mensaje temporal en la pantalla */
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  // Forzar reflow para reiniciar animación
+  void t.offsetWidth;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILIDADES
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Escapa caracteres especiales para inserción segura en HTML */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** Escapa caracteres especiales para XML/KML */
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/** Escapa un valor para CSV (comillas dobles si contiene comas o comillas) */
+function csvEscape(val) {
+  const s = String(val);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INICIALIZACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Punto de entrada: carga datos y renderiza la UI al arrancar */
+(function init() {
+  loadFromStorage();   // Recuperar puntos de localStorage
+  renderCategories();  // Dibujar botones de categoría
+  renderList();        // Renderizar lista de puntos existentes
+  updateCount();       // Actualizar contador del header
+})();
+</script>
+</body>
+</html>
