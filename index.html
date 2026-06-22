@@ -93,11 +93,11 @@ footer{text-align:center;color:var(--muted);font-size:10px;padding:18px;border-t
 
 <script>
 const cabanas = [
-  { nombre:"Cabaña 1", lat:29.071380, lng:-106.525180 },
-  { nombre:"Cabaña 2", lat:29.071250, lng:-106.525450 },
-  { nombre:"Palapa",   lat:29.071100, lng:-106.525780 },
-  { nombre:"Cabaña 4", lat:29.070980, lng:-106.525550 },
-  { nombre:"Cabaña 5", lat:29.070820, lng:-106.525520 },
+  { nombre:"Cabaña 1", lat:29.071300, lng:-106.525350 },
+  { nombre:"Cabaña 2", lat:29.071180, lng:-106.525550 },
+  { nombre:"Palapa",   lat:29.071020, lng:-106.525750 },
+  { nombre:"Cabaña 4", lat:29.070900, lng:-106.525600 },
+  { nombre:"Cabaña 5", lat:29.070730, lng:-106.525560 },
 ];
 
 // ── Mapa con Leaflet + tile satelital de ESRI (sin API key) ──
@@ -108,20 +108,12 @@ const map = L.map('mapa', {
   zoomControl: true,
 });
 
-// Capa satelital base
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: '© Esri, DigitalGlobe, GeoEye',
-  maxZoom: 22,
-  maxNativeZoom: 19,
-  crossOrigin: true,
-}).addTo(map);
-
-// Capa de etiquetas encima
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 22,
-  maxNativeZoom: 19,
-  crossOrigin: true,
-  opacity: 0.7,
+// Satelital Google via proxy público (más confiable en móvil)
+L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  attribution: '© Google Maps Satellite',
+  maxZoom: 21,
+  maxNativeZoom: 20,
+  subdomains: ['mt0','mt1','mt2','mt3'],
 }).addTo(map);
 
 // Ícono de cabaña SVG personalizado
