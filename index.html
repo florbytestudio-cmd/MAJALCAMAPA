@@ -2,872 +2,220 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Majalca Campo · FlorByte</title>
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Majalca — Cabañas de Peter</title>
 <style>
-  /* ── Variables de diseño ── */
-  :root {
-    --bg:      #0d1117;
-    --surface: #161b22;
-    --border:  #30363d;
-    --accent:  #3fb950;
-    --warn:    #f85149;
-    --muted:   #8b949e;
-    --text:    #e6edf3;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+:root{--bg:#0d100c;--surface:#161a13;--border:#2a3022;--text:#f2f4ee;--muted:#8a9180;--accent:#84cc16;--accent2:#4d7c0f}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+header{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-title{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700}
+.logo-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.badge{font-size:11px;font-weight:600;color:var(--accent);background:rgba(132,204,22,.1);border:1px solid rgba(132,204,22,.25);padding:4px 12px;border-radius:99px}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'SF Pro Display', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    font-size: 15px;
-    line-height: 1.5;
-    -webkit-tap-highlight-color: transparent;
-  }
+main{padding:24px 28px;max-width:1100px;margin:0 auto}
 
-  /* ── Header ── */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
-  .header-logo { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
-  .header-title { font-size: 16px; font-weight: 700; }
-  .header-count { font-size: 11px; font-weight: 700; background: var(--accent); color: #000; border-radius: 20px; padding: 2px 10px; }
+.map-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:22px}
+.map-head{padding:16px 20px;border-bottom:1px solid var(--border)}
+.map-head h2{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600}
+.map-head p{font-size:11px;color:var(--muted);margin-top:2px}
+#mapa{width:100%;height:520px;background:#1a2412}
 
-  /* ── Tab nav ── */
-  .tab-bar {
-    display: flex;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 49px;
-    z-index: 999;
-  }
-  .tab-btn {
-    flex: 1;
-    min-height: 44px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    -webkit-user-select: none;
-  }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tooltip-box{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:var(--surface);border:1px solid var(--accent);border-radius:14px;
+  padding:20px 24px;z-index:1000;min-width:240px;text-align:center;
+  display:none;box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.tooltip-box .t-icon{font-size:36px;margin-bottom:8px}
+.tooltip-box .t-name{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px}
+.tooltip-box .t-coord{font-size:11px;color:var(--muted);margin-bottom:14px}
+.tooltip-box .t-btn{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tooltip-box a,.tooltip-box button{font-size:11px;padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);text-decoration:none;cursor:pointer;font-family:inherit}
+.tooltip-box .close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
 
-  /* ── Tab panels ── */
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 17px;cursor:pointer;transition:border-color .2s}
+.card:hover{border-color:var(--accent)}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-num{width:26px;height:26px;border-radius:8px;background:var(--accent2);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.card-name{font-weight:600;font-size:13px}
+.card-lat,.card-lng{font-size:11px;color:var(--muted);font-family:'Space Grotesk',sans-serif}
 
-  /* ── Mapa ── */
-  #map {
-    width: 100%;
-    height: calc(100vh - 93px);
-    background: #0d1117;
-  }
-  /* Oscurecer tiles para dark mode */
-  .leaflet-tile { filter: brightness(0.7) invert(1) hue-rotate(200deg) saturate(0.4) brightness(0.7); }
-  .leaflet-container { background: #0d1117; }
-
-  /* Botón centrar en mapa */
-  .map-fab {
-    position: absolute;
-    bottom: 20px;
-    right: 16px;
-    z-index: 500;
-    width: 52px; height: 52px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 50%;
-    font-size: 22px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-    -webkit-user-select: none;
-  }
-
-  /* Leyenda del mapa */
-  .map-legend {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 500;
-    background: rgba(22,27,34,0.92);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    font-size: 11px;
-    max-width: 160px;
-    backdrop-filter: blur(8px);
-  }
-  .legend-title { font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; font-size: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--text); }
-  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
-  /* ── Panel de captura ── */
-  .main { max-width: 540px; margin: 0 auto; padding: 16px; }
-  .section { margin-bottom: 18px; }
-  .section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-
-  /* GPS button */
-  .btn-gps {
-    width: 100%; min-height: 64px;
-    background: var(--accent); color: #000;
-    font-size: 15px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
-    border: none; border-radius: 12px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: opacity 0.15s, transform 0.1s;
-    -webkit-user-select: none;
-  }
-  .btn-gps:active { opacity: 0.8; transform: scale(0.98); }
-  .btn-gps:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .coords-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  .coord-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  .coord-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
-  .coord-value { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
-
-  .accuracy-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 600; margin-top: 8px;
-    padding: 3px 10px; border-radius: 20px;
-    background: var(--bg); border: 1px solid var(--border); color: var(--muted);
-  }
-
-  /* Categorías */
-  .cat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .cat-btn {
-    min-height: 48px; border: 2px solid var(--border); border-radius: 10px;
-    background: var(--bg); color: var(--text);
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; gap: 7px; padding: 0 12px;
-    transition: border-color 0.15s, background 0.15s;
-    -webkit-user-select: none;
-  }
-  .cat-btn.selected {
-    background: color-mix(in srgb, var(--cat-color) 15%, transparent);
-    border-color: var(--cat-color); color: var(--cat-color);
-  }
-  .cat-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cat-color); flex-shrink: 0; }
-
-  /* Textarea */
-  .field-textarea {
-    width: 100%; min-height: 72px;
-    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-    color: var(--text); font-size: 15px; padding: 12px;
-    resize: vertical; font-family: inherit; outline: none;
-    transition: border-color 0.15s;
-  }
-  .field-textarea:focus { border-color: var(--accent); }
-  .field-textarea::placeholder { color: var(--muted); }
-
-  /* Botones de acción */
-  .btn-save {
-    width: 100%; min-height: 52px;
-    background: #21262d; color: var(--text);
-    font-size: 15px; font-weight: 700;
-    border: 2px solid var(--border); border-radius: 12px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: background 0.15s, border-color 0.15s;
-    -webkit-user-select: none;
-  }
-  .btn-save:active { background: #30363d; border-color: var(--accent); }
-
-  .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .btn-export {
-    min-height: 52px; border: 1px solid var(--border); border-radius: 10px;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    padding: 12px 8px; transition: background 0.15s;
-    -webkit-user-select: none;
-  }
-  .btn-export-kml { background: #0d1b2a; color: #58a6ff; border-color: #1f6feb; }
-  .btn-export-csv { background: #1b1f0d; color: #56d364; border-color: #2ea043; }
-  .btn-export-danger { background: #1b0d0d; color: var(--warn); border-color: #6e1010; }
-  .btn-export span.ext { font-size: 18px; }
-
-  /* Lista puntos */
-  .points-list { display: flex; flex-direction: column; gap: 8px; }
-  .point-item {
-    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px; display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: start;
-  }
-  .point-cat { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-  .point-notes { font-size: 13px; color: var(--text); margin-top: 2px; }
-  .point-meta { font-size: 11px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
-  .btn-del {
-    min-width: 36px; height: 36px; border: 1px solid var(--border);
-    background: transparent; color: var(--warn); border-radius: 8px;
-    cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: background 0.15s;
-  }
-  .btn-del:active { background: #1b0d0d; }
-
-  /* Collapsible */
-  .collapsible-trigger {
-    width: 100%; background: transparent; border: none;
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer; padding: 0; margin-bottom: 12px;
-  }
-  .collapsible-content.hidden { display: none; }
-  .chevron { transition: transform 0.2s; }
-  .chevron.open { transform: rotate(180deg); }
-
-  /* Spinner */
-  .spinner {
-    width: 20px; height: 20px;
-    border: 3px solid rgba(0,0,0,0.3); border-top-color: #000;
-    border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Toast */
-  .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #2ea043; color: #fff;
-    font-size: 13px; font-weight: 600;
-    padding: 10px 20px; border-radius: 24px;
-    white-space: nowrap; transition: transform 0.3s, opacity 0.3s;
-    opacity: 0; z-index: 2000; pointer-events: none;
-  }
-  .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
-  .toast.error { background: var(--warn); }
-
-  /* Modal */
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-    z-index: 3000; display: flex; align-items: center; justify-content: center;
-    padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-  }
-  .modal-backdrop.open { opacity: 1; pointer-events: all; }
-  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; }
-  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: var(--warn); }
-  .modal-body { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
-  .modal-actions { display: flex; gap: 10px; }
-  .btn-modal-cancel { flex: 1; min-height: 48px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
-  .btn-modal-confirm { flex: 1; min-height: 48px; background: var(--warn); border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
-
-  /* Empty state */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
-  .empty-state .icon { font-size: 36px; margin-bottom: 8px; }
-
-  /* Leaflet popup oscuro */
-  .leaflet-popup-content-wrapper {
-    background: var(--surface) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
-  }
-  .leaflet-popup-tip { background: var(--surface) !important; }
-  .leaflet-popup-content { font-size: 13px !important; line-height: 1.5 !important; }
-  .popup-cat { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-  .popup-notes { color: var(--muted); font-size: 12px; }
-  .popup-meta { color: var(--muted); font-size: 11px; margin-top: 4px; }
+footer{text-align:center;color:var(--muted);font-size:10px;padding:18px;border-top:1px solid var(--border);margin-top:6px}
 </style>
+
+<!-- Leaflet para mapa satelital real sin API key -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 
-<!-- ═══ HEADER ═══ -->
-<header class="header">
-  <span class="header-logo">FlorByte · Campo</span>
-  <span class="header-title">📍 Majalca</span>
-  <span class="header-count" id="headerCount">0</span>
+<header>
+  <div class="logo">
+    <div class="logo-icon">🌲</div>
+    <div>
+      <div class="logo-title">Majalca — Cabañas</div>
+      <div class="logo-sub">Levantamiento GPS · FlorByte Studio</div>
+    </div>
+  </div>
+  <div class="badge">4 cabañas + 1 palapa</div>
 </header>
 
-<!-- ═══ TAB BAR ═══ -->
-<nav class="tab-bar">
-  <button class="tab-btn active" id="tabBtnMap" onclick="switchTab('map')">🗺️ Mapa</button>
-  <button class="tab-btn" id="tabBtnCapture" onclick="switchTab('capture')">📍 Capturar</button>
-  <button class="tab-btn" id="tabBtnList" onclick="switchTab('list')">📋 Lista</button>
-</nav>
-
-<!-- ═══ TAB: MAPA ═══ -->
-<div class="tab-panel active" id="panelMap" style="position:relative;">
-  <div id="map"></div>
-
-  <!-- Leyenda -->
-  <div class="map-legend" id="mapLegend">
-    <div class="legend-title">Categorías</div>
-    <!-- Renderizada por JS -->
+<main>
+  <div class="map-wrap">
+    <div class="map-head">
+      <h2>Vista satelital con vegetación real</h2>
+      <p>Toca cualquier ícono de cabaña para ver sus coordenadas. Usa pinch para zoom en móvil.</p>
+    </div>
+    <div id="mapa"></div>
   </div>
 
-  <!-- FAB: centrar en mi posición -->
-  <button class="map-fab" onclick="centerOnMe()" title="Mi ubicación">◎</button>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="tooltip-box" id="tooltip">
+  <button class="close" onclick="cerrar()">✕</button>
+  <div class="t-icon" id="t-icon">🏠</div>
+  <div class="t-name" id="t-name"></div>
+  <div class="t-coord" id="t-coord"></div>
+  <div class="t-btn">
+    <a id="t-maps" target="_blank" href="#">📍 Ver en Maps</a>
+    <button onclick="copiar()">📋 Copiar coords</button>
+  </div>
 </div>
 
-<!-- ═══ TAB: CAPTURAR ═══ -->
-<div class="tab-panel" id="panelCapture">
-<div class="main">
-
-  <!-- GPS -->
-  <div class="section">
-    <p class="section-label">Captura de Ubicación</p>
-    <div class="card">
-      <button class="btn-gps" id="btnCapture" onclick="captureGPS()">
-        <span id="gpsIcon">🛰️</span>
-        <span id="gpsLabel">CAPTURAR UBICACIÓN ACTUAL</span>
-      </button>
-      <div class="coords-row">
-        <div class="coord-box">
-          <div class="coord-label">Latitud</div>
-          <div class="coord-value" id="dispLat">—</div>
-        </div>
-        <div class="coord-box">
-          <div class="coord-label">Longitud</div>
-          <div class="coord-value" id="dispLon">—</div>
-        </div>
-      </div>
-      <div style="margin-top:8px;">
-        <span class="accuracy-chip" id="accuracyChip">⊙ Precisión: —</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Categoría -->
-  <div class="section">
-    <p class="section-label">Categoría del Punto</p>
-    <div class="card">
-      <div class="cat-grid" id="catGrid"></div>
-    </div>
-  </div>
-
-  <!-- Notas -->
-  <div class="section">
-    <p class="section-label">Notas / Atributos</p>
-    <textarea class="field-textarea" id="fieldNotes"
-      placeholder="Ej: Pino de ~15m altura, tronco 40cm diámetro…"></textarea>
-  </div>
-
-  <!-- Guardar -->
-  <div class="section">
-    <button class="btn-save" onclick="savePoint()">＋ Guardar Punto</button>
-  </div>
-
-  <!-- Exportar -->
-  <div class="section">
-    <p class="section-label">Exportar Datos</p>
-    <div class="card">
-      <div class="export-grid" style="margin-bottom:10px;">
-        <button class="btn-export btn-export-kml" onclick="exportKML()">
-          <span class="ext">🌍</span><span>KML</span>
-          <span style="font-size:10px;font-weight:400;opacity:0.8;">SketchUp / GEarth</span>
-        </button>
-        <button class="btn-export btn-export-csv" onclick="exportCSV()">
-          <span class="ext">📊</span><span>CSV</span>
-          <span style="font-size:10px;font-weight:400;opacity:0.8;">AutoCAD / Excel</span>
-        </button>
-      </div>
-      <button class="btn-export btn-export-danger" onclick="openClearModal()"
-        style="width:100%;flex-direction:row;gap:8px;min-height:44px;font-size:13px;">
-        🗑️ Limpiar Base de Datos
-      </button>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ═══ TAB: LISTA ═══ -->
-<div class="tab-panel" id="panelList">
-<div class="main">
-  <div class="section">
-    <div class="card">
-      <button class="collapsible-trigger" onclick="toggleList()">
-        <p class="section-label" style="margin:0;" id="listLabel">Puntos Registrados: 0</p>
-        <span class="chevron open" id="listChevron" style="color:var(--muted);font-size:18px;">⌃</span>
-      </button>
-      <div class="collapsible-content" id="pointsList">
-        <div class="empty-state">
-          <div class="icon">🌲</div>
-          <p>Ningún punto registrado aún.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ═══ TOAST ═══ -->
-<div class="toast" id="toast"></div>
-
-<!-- ═══ MODAL ═══ -->
-<div class="modal-backdrop" id="clearModal">
-  <div class="modal-box">
-    <div class="modal-title">⚠️ Limpiar Base de Datos</div>
-    <div class="modal-body">
-      Esta acción eliminará <strong style="color:var(--text)">todos los puntos</strong>
-      de forma permanente. No hay deshacer.<br><br>¿Confirmas el borrado total?
-    </div>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeClearModal()">Cancelar</button>
-      <button class="btn-modal-confirm" onclick="clearAllPoints()">Sí, borrar todo</button>
-    </div>
-  </div>
-</div>
+<footer>FlorByte Studio · Coordenadas estimadas en base a levantamiento de campo · Cañón de Majalca, Chihuahua</footer>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   MAJALCA CAMPO · FlorByte Studio
-   v2 — Con mapa Leaflet, posición GPS en vivo y líneas de camino
-   ═══════════════════════════════════════════════════════════════ */
-
-// ── Estado global ──
-const STORAGE_KEY = 'majalca_puntos_v1';
-let puntos = [];
-let currentLat = null;
-let currentLon = null;
-let selectedCat = null;
-
-// ── Mapa y capas ──
-let map = null;
-let markerLayerGroup = null;   // Marcadores de todos los puntos
-let roadPolylines = [];        // Polilíneas de caminos
-let myLocationMarker = null;   // Marcador posición actual (en vivo)
-let watchId = null;            // ID del GPS watcher
-
-// ── Categorías ──
-const CATEGORIES = [
-  { id: 'pino',     label: '🌲 Árbol Pino',      color: '#56d364' },
-  { id: 'encino',   label: '🌳 Árbol Encino',     color: '#d29922' },
-  { id: 'cabana_e', label: '🏠 Cabaña (Esquina)', color: '#58a6ff' },
-  { id: 'cabana_c', label: '🏠 Cabaña (Centro)',  color: '#79c0ff' },
-  { id: 'fogata',   label: '🔥 Fogata',           color: '#ff7b72' },
-  { id: 'asador',   label: '🍖 Asador',           color: '#ffa657' },
-  { id: 'camino',   label: '🛤️ Camino/Acceso',   color: '#a5d6ff' },
-  { id: 'otro',     label: '📌 Otro',             color: '#d2a8ff' },
+const cabanas = [
+  { nombre:"Cabaña 1", lat:29.071380, lng:-106.525180 },
+  { nombre:"Cabaña 2", lat:29.071250, lng:-106.525450 },
+  { nombre:"Palapa",   lat:29.071100, lng:-106.525780 },
+  { nombre:"Cabaña 4", lat:29.070980, lng:-106.525550 },
+  { nombre:"Cabaña 5", lat:29.070820, lng:-106.525520 },
 ];
 
-function colorForCat(id) { return (CATEGORIES.find(c => c.id === id) || {}).color || '#8b949e'; }
-function labelForCat(id) { return (CATEGORIES.find(c => c.id === id) || {}).label || id; }
+// ── Mapa con Leaflet + tile satelital de ESRI (sin API key) ──
+document.getElementById('mapa').style.height = '520px';
+const map = L.map('mapa', {
+  center: [29.071100, -106.525550],
+  zoom: 19,
+  zoomControl: true,
+});
 
-/* ═══ LOCAL STORAGE ═══ */
-function loadFromStorage() {
-  try { puntos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch(e) { puntos = []; }
-}
-function saveToStorage() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(puntos)); }
-  catch(e) { showToast('Error guardando datos', true); }
-}
+// Capa satelital base
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: '© Esri, DigitalGlobe, GeoEye',
+  maxZoom: 22,
+  maxNativeZoom: 19,
+  crossOrigin: true,
+}).addTo(map);
 
-/* ═══ MAPA LEAFLET ═══ */
+// Capa de etiquetas encima
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 22,
+  maxNativeZoom: 19,
+  crossOrigin: true,
+  opacity: 0.7,
+}).addTo(map);
 
-/** Inicializa el mapa centrado en Majalca, Chihuahua */
-function initMap() {
-  // Centro aproximado de Parque Nacional Cañón de Majalca
-  map = L.map('map', {
-    center: [28.948, -106.953],
-    zoom: 15,
-    zoomControl: true,
-    attributionControl: false,
-  });
+// Ícono de cabaña SVG personalizado
+function cabanIcon(num, tipo) {
+  const esPalapa = tipo === 'palapa';
+  const color = esPalapa ? '#f59e0b' : '#84cc16';
+  const colorDark = esPalapa ? '#92400e' : '#1a2e0e';
+  const colorLight = esPalapa ? '#fcd34d' : '#a3e635';
 
-  // Tiles OpenStreetMap (se cachean en el navegador automáticamente)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap',
-  }).addTo(map);
+  const svg = esPalapa
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="56" viewBox="0 0 48 56">
+        <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter>
+        <g filter="url(#s)">
+          <ellipse cx="24" cy="18" rx="22" ry="10" fill="${colorDark}" stroke="${color}" stroke-width="1.5"/>
+          <ellipse cx="24" cy="14" rx="18" ry="7" fill="${color}" opacity="0.85"/>
+          <ellipse cx="24" cy="11" rx="13" ry="5" fill="${colorLight}" opacity="0.7"/>
+          <rect x="22" y="18" width="4" height="22" fill="${colorDark}" stroke="${color}" stroke-width="1"/>
+          <ellipse cx="24" cy="42" rx="10" ry="3" fill="${colorDark}" opacity="0.5"/>
+        </g>
+        <text x="24" y="16" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Inter,sans-serif">P</text>
+      </svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="56" viewBox="0 0 48 56">
+        <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter>
+        <g filter="url(#s)">
+          <path d="M24 2 L46 20 L38 20 L38 46 L10 46 L10 20 L2 20 Z" fill="${colorDark}" stroke="${color}" stroke-width="1.5"/>
+          <rect x="14" y="28" width="8" height="10" fill="${color}" rx="1"/>
+          <rect x="26" y="28" width="8" height="18" fill="${color}" rx="1"/>
+          <rect x="14" y="20" width="5" height="5" fill="${colorLight}" rx="0.5"/>
+          <rect x="29" y="20" width="5" height="5" fill="${colorLight}" rx="0.5"/>
+        </g>
+        <circle cx="24" cy="50" r="4" fill="${color}" opacity="0.7"/>
+        <text x="24" y="37" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Inter,sans-serif">${num}</text>
+      </svg>`;
 
-  // Capa de marcadores
-  markerLayerGroup = L.layerGroup().addTo(map);
-
-  // Renderizar puntos guardados
-  renderMapMarkers();
-  renderLegend();
-
-  // Iniciar GPS en vivo para mostrar posición
-  startLiveGPS();
-}
-
-/** Crea un ícono SVG circular para Leaflet con el color de la categoría */
-function createCatIcon(color) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="32" viewBox="0 0 24 32">
-    <ellipse cx="12" cy="30" rx="5" ry="2" fill="rgba(0,0,0,0.3)"/>
-    <path d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 21 9 21s9-14.25 9-21C21 4.03 16.97 0 12 0z" fill="${color}" stroke="#000" stroke-width="1.5"/>
-    <circle cx="12" cy="9" r="4" fill="rgba(255,255,255,0.35)"/>
-  </svg>`;
   return L.divIcon({
     html: svg,
-    iconSize: [24, 32],
-    iconAnchor: [12, 32],
-    popupAnchor: [0, -34],
-    className: '',
+    iconSize: [48, 56],
+    iconAnchor: [24, 54],
+    popupAnchor: [0, -54],
+    className: ''
   });
 }
 
-/** Ícono especial para la posición actual del usuario */
-function createMyLocationIcon() {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-    <circle cx="14" cy="14" r="13" fill="#3fb950" stroke="#000" stroke-width="2" opacity="0.25"/>
-    <circle cx="14" cy="14" r="7" fill="#3fb950" stroke="#fff" stroke-width="2"/>
-  </svg>`;
-  return L.divIcon({
-    html: svg,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    className: '',
-  });
+let seleccionada = null;
+
+cabanas.forEach((c, i) => {
+  const tipo = c.nombre.toLowerCase().includes("palapa") ? "palapa" : "cabana";
+  const marker = L.marker([c.lat, c.lng], { icon: cabanIcon(i+1, tipo) }).addTo(map);
+  marker.on('click', () => mostrar(c));
+});
+
+function mostrar(c) {
+  seleccionada = c;
+  document.getElementById('t-icon').textContent = c.nombre.toLowerCase().includes('palapa') ? '🌴' : '🏠';
+  document.getElementById('t-name').textContent = c.nombre;
+  document.getElementById('t-coord').textContent = `${c.lat}, ${c.lng}`;
+  document.getElementById('t-maps').href = `https://www.google.com/maps?q=${c.lat},${c.lng}`;
+  document.getElementById('tooltip').style.display = 'block';
 }
 
-/** Renderiza todos los puntos en el mapa como marcadores y dibuja líneas de caminos */
-function renderMapMarkers() {
-  if (!map) return;
-  markerLayerGroup.clearLayers();
-
-  // Limpiar polilíneas de caminos anteriores
-  roadPolylines.forEach(p => map.removeLayer(p));
-  roadPolylines = [];
-
-  // Puntos de camino para conectar con línea
-  const caminoPuntos = puntos.filter(p => p.cat === 'camino');
-  if (caminoPuntos.length >= 2) {
-    // Ordenar por timestamp para conectar en orden de captura
-    const sorted = [...caminoPuntos].sort((a, b) => a.id - b.id);
-    const latlngs = sorted.map(p => [p.lat, p.lon]);
-    const poly = L.polyline(latlngs, {
-      color: '#a5d6ff',
-      weight: 3,
-      opacity: 0.8,
-      dashArray: '8, 6',
-    }).addTo(map);
-    roadPolylines.push(poly);
-  }
-
-  // Marcador por cada punto
-  puntos.forEach((p, i) => {
-    const color = colorForCat(p.cat);
-    const label = labelForCat(p.cat);
-    const icon  = createCatIcon(color);
-    const num   = puntos.length - i;
-
-    const marker = L.marker([p.lat, p.lon], { icon })
-      .bindPopup(`
-        <div class="popup-cat" style="color:${color}">${num}. ${label}</div>
-        ${p.notas ? `<div class="popup-notes">${escapeHtml(p.notas)}</div>` : ''}
-        <div class="popup-meta">📍 ${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}<br>🕐 ${p.fecha} ${p.hora}</div>
-      `, { maxWidth: 220 });
-
-    markerLayerGroup.addLayer(marker);
-  });
+function cerrar() {
+  document.getElementById('tooltip').style.display = 'none';
 }
 
-/** Inicia el seguimiento GPS en vivo para mostrar posición actual en el mapa */
-function startLiveGPS() {
-  if (!navigator.geolocation) return;
-  watchId = navigator.geolocation.watchPosition(
-    function(pos) {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-
-      if (!myLocationMarker) {
-        myLocationMarker = L.marker([lat, lon], { icon: createMyLocationIcon(), zIndexOffset: 1000 })
-          .addTo(map)
-          .bindTooltip('Tú', { permanent: false, direction: 'top' });
-      } else {
-        myLocationMarker.setLatLng([lat, lon]);
-      }
-    },
-    function() { /* silencioso en mapa */ },
-    { enableHighAccuracy: true, maximumAge: 3000 }
-  );
+function copiar() {
+  if (!seleccionada) return;
+  navigator.clipboard.writeText(`${seleccionada.lat}, ${seleccionada.lng}`);
+  document.querySelector('.t-btn button').textContent = '✅ Copiado';
+  setTimeout(() => document.querySelector('.t-btn button').textContent = '📋 Copiar coords', 2000);
 }
 
-/** Centra el mapa en la posición actual del usuario */
-function centerOnMe() {
-  if (myLocationMarker) {
-    map.setView(myLocationMarker.getLatLng(), 17, { animate: true });
-  } else if (currentLat !== null) {
-    map.setView([currentLat, currentLon], 17, { animate: true });
-  } else {
-    showToast('Captura tu ubicación primero', true);
-  }
-}
+// Fix: forzar redibujado del mapa
+setTimeout(() => { map.invalidateSize(); }, 300);
+window.addEventListener('resize', () => map.invalidateSize());
 
-/** Renderiza la leyenda del mapa */
-function renderLegend() {
-  const legend = document.getElementById('mapLegend');
-  legend.innerHTML = '<div class="legend-title">Categorías</div>' +
-    CATEGORIES.map(c => `
-      <div class="legend-item">
-        <span class="legend-dot" style="background:${c.color}"></span>
-        <span>${c.label}</span>
-      </div>`).join('') +
-    `<div class="legend-item" style="margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">
-      <span class="legend-dot" style="background:#3fb950;border:2px solid #fff;"></span>
-      <span>Mi posición</span>
-    </div>
-    <div class="legend-item">
-      <span style="width:24px;border-top:2px dashed #a5d6ff;display:inline-block;"></span>
-      <span style="margin-left:4px;">Camino</span>
-    </div>`;
-}
-
-/* ═══ TABS ═══ */
-function switchTab(tab) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-  document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-
-  // Forzar redibujado del mapa al mostrar el tab
-  if (tab === 'map' && map) {
-    setTimeout(() => map.invalidateSize(), 50);
-  }
-}
-
-/* ═══ GEOLOCALIZACIÓN ═══ */
-function captureGPS() {
-  if (!navigator.geolocation) { showToast('GPS no disponible', true); return; }
-
-  const btn = document.getElementById('btnCapture');
-  const lbl = document.getElementById('gpsLabel');
-  const ico = document.getElementById('gpsIcon');
-  btn.disabled = true;
-  lbl.textContent = 'BUSCANDO SATÉLITES…';
-  ico.innerHTML = '<span class="spinner"></span>';
-
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      currentLat = pos.coords.latitude;
-      currentLon = pos.coords.longitude;
-      const acc   = pos.coords.accuracy;
-
-      document.getElementById('dispLat').textContent = currentLat.toFixed(7);
-      document.getElementById('dispLon').textContent = currentLon.toFixed(7);
-
-      const accColor = acc < 5 ? '#56d364' : acc < 15 ? '#d29922' : '#f85149';
-      document.getElementById('accuracyChip').innerHTML =
-        `<span style="color:${accColor}">⊙</span> Precisión: ±${acc.toFixed(1)} m`;
-
-      btn.disabled = false;
-      lbl.textContent = 'ACTUALIZAR UBICACIÓN';
-      ico.textContent = '✓';
-      showToast('Ubicación capturada · ±' + acc.toFixed(1) + 'm');
-
-      // Centrar mapa en la posición capturada
-      if (map) map.setView([currentLat, currentLon], 17, { animate: true });
-    },
-    function(err) {
-      btn.disabled = false;
-      lbl.textContent = 'CAPTURAR UBICACIÓN ACTUAL';
-      ico.textContent = '🛰️';
-      let msg = 'Error GPS: ' + err.message;
-      if (err.code === 1) msg = 'Permiso de ubicación denegado';
-      if (err.code === 3) msg = 'GPS tardó demasiado · Intenta de nuevo';
-      showToast(msg, true);
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
-}
-
-/* ═══ GUARDAR / ELIMINAR PUNTOS ═══ */
-function savePoint() {
-  if (currentLat === null) { showToast('Primero captura tu ubicación GPS', true); return; }
-  if (!selectedCat)        { showToast('Selecciona una categoría', true); return; }
-
-  const notes = document.getElementById('fieldNotes').value.trim();
-  const now   = new Date();
-
-  const punto = {
-    id:        Date.now(),
-    cat:       selectedCat,
-    notas:     notes,
-    lat:       currentLat,
-    lon:       currentLon,
-    timestamp: now.toISOString(),
-    hora:      now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' }),
-    fecha:     now.toLocaleDateString('es-MX'),
+// ── Tarjetas ──
+const grid = document.getElementById('grid');
+cabanas.forEach((c, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.onclick = () => {
+    map.setView([c.lat, c.lng], 20);
+    mostrar(c);
   };
-
-  puntos.unshift(punto);
-  saveToStorage();
-  renderList();
-  renderMapMarkers();  // ← Actualiza mapa inmediatamente
-  updateCount();
-
-  document.getElementById('fieldNotes').value = '';
-  showToast('Punto guardado: ' + labelForCat(selectedCat));
-
-  // Saltar al mapa para ver el punto recién guardado
-  switchTab('map');
-  if (map) map.setView([currentLat, currentLon], 17, { animate: true });
-}
-
-function deletePoint(id) {
-  puntos = puntos.filter(p => p.id !== id);
-  saveToStorage();
-  renderList();
-  renderMapMarkers();
-  updateCount();
-  showToast('Punto eliminado');
-}
-
-function clearAllPoints() {
-  puntos = [];
-  saveToStorage();
-  renderList();
-  renderMapMarkers();
-  updateCount();
-  closeClearModal();
-  showToast('Base de datos limpiada');
-}
-
-/* ═══ RENDER UI ═══ */
-function renderCategories() {
-  document.getElementById('catGrid').innerHTML = CATEGORIES.map(cat => `
-    <button class="cat-btn ${selectedCat === cat.id ? 'selected' : ''}"
-      style="--cat-color:${cat.color}" onclick="selectCat('${cat.id}')">
-      <span class="cat-dot" style="--cat-color:${cat.color}"></span>
-      ${cat.label}
-    </button>`).join('');
-}
-
-function selectCat(catId) {
-  selectedCat = catId;
-  renderCategories();
-}
-
-function renderList() {
-  const container = document.getElementById('pointsList');
-  document.getElementById('listLabel').textContent = `Puntos Registrados: ${puntos.length}`;
-
-  if (puntos.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🌲</div><p>Ningún punto registrado aún.</p></div>`;
-    return;
-  }
-
-  container.innerHTML = `<div class="points-list">` + puntos.map((p, i) => {
-    const color = colorForCat(p.cat);
-    const label = labelForCat(p.cat);
-    const num   = puntos.length - i;
-    return `
-      <div class="point-item">
-        <div>
-          <div class="point-cat" style="color:${color}">${num}. ${label}</div>
-          ${p.notas ? `<div class="point-notes">${escapeHtml(p.notas)}</div>` : ''}
-          <div class="point-meta">📍 ${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}<br>🕐 ${p.fecha} ${p.hora}</div>
-        </div>
-        <button class="btn-del" onclick="deletePoint(${p.id})">✕</button>
-      </div>`;
-  }).join('') + `</div>`;
-}
-
-function updateCount() {
-  document.getElementById('headerCount').textContent = puntos.length;
-}
-
-function toggleList() {
-  document.getElementById('pointsList').classList.toggle('hidden');
-  document.getElementById('listChevron').classList.toggle('open');
-}
-
-/* ═══ EXPORTACIÓN ═══ */
-function exportKML() {
-  if (!puntos.length) { showToast('No hay puntos para exportar', true); return; }
-  const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-  const placemarks = puntos.map(p => `
-    <Placemark>
-      <name>${escapeXml(labelForCat(p.cat))}</name>
-      <description><![CDATA[Notas: ${p.notas||'—'} | Capturado: ${p.fecha} ${p.hora}]]></description>
-      <Point><coordinates>${p.lon},${p.lat},0</coordinates></Point>
-      <ExtendedData>
-        <Data name="Categoria"><value>${escapeXml(p.cat)}</value></Data>
-        <Data name="Fecha_Hora"><value>${p.timestamp}</value></Data>
-      </ExtendedData>
-    </Placemark>`).join('\n');
-
-  downloadBlob(`<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <name>Majalca Campo · ${fecha}</name>
-    <description>Levantamiento FlorByte Campo App</description>
-${placemarks}
-  </Document>
-</kml>`, `majalca_campo_${fecha}.kml`, 'application/vnd.google-earth.kml+xml');
-  showToast('KML exportado (' + puntos.length + ' puntos)');
-}
-
-function exportCSV() {
-  if (!puntos.length) { showToast('No hay puntos para exportar', true); return; }
-  const fecha = new Date().toLocaleDateString('es-MX').replace(/\//g, '-');
-  const rows  = puntos.map((p, i) => [
-    i+1, csvEscape(labelForCat(p.cat)),
-    p.lat.toFixed(8), p.lon.toFixed(8),
-    csvEscape(p.notas||''), `${p.fecha} ${p.hora}`
-  ].join(',')).join('\n');
-  downloadBlob('\uFEFF' + 'ID,Categoria,Latitud,Longitud,Notas,Fecha_Hora\n' + rows,
-    `majalca_campo_${fecha}.csv`, 'text/csv;charset=utf-8;');
-  showToast('CSV exportado (' + puntos.length + ' puntos)');
-}
-
-function downloadBlob(content, filename, mime) {
-  const a = Object.assign(document.createElement('a'), {
-    href: URL.createObjectURL(new Blob([content], { type: mime })),
-    download: filename,
-  });
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-/* ═══ MODAL ═══ */
-function openClearModal()  { document.getElementById('clearModal').classList.add('open'); }
-function closeClearModal() { document.getElementById('clearModal').classList.remove('open'); }
-document.getElementById('clearModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeClearModal(); });
-
-/* ═══ TOAST ═══ */
-let toastTimer;
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
-  void t.offsetWidth;
-  t.classList.add('visible');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('visible'), 2800);
-}
-
-/* ═══ UTILS ═══ */
-function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escapeXml(s)  { return escapeHtml(s).replace(/'/g,'&apos;'); }
-function csvEscape(v)  { const s=String(v); return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s; }
-
-/* ═══ INIT ═══ */
-(function init() {
-  loadFromStorage();
-  renderCategories();
-  renderList();
-  updateCount();
-  // Iniciar mapa después de que el DOM esté listo
-  setTimeout(initMap, 100);
-})();
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="card-num">${i+1}</div>
+      <div class="card-name">${c.nombre}</div>
+    </div>
+    <div class="card-lat">Lat: ${c.lat}</div>
+    <div class="card-lng">Lng: ${c.lng}</div>
+  `;
+  grid.appendChild(card);
+});
 </script>
 </body>
 </html>
