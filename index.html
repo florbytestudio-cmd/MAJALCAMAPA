@@ -63,7 +63,7 @@ footer{text-align:center;color:var(--muted);font-size:10px;padding:18px;border-t
       <div class="logo-sub">Levantamiento GPS · FlorByte Studio</div>
     </div>
   </div>
-  <div class="badge">4 cabañas + 1 palapa</div>
+  <div class="badge">4 cabañas · palapa · tienda</div>
 </header>
 
 <main>
@@ -93,17 +93,18 @@ footer{text-align:center;color:var(--muted);font-size:10px;padding:18px;border-t
 
 <script>
 const cabanas = [
-  { nombre:"Cabaña 1", lat:29.071300, lng:-106.525350 },
-  { nombre:"Cabaña 2", lat:29.071180, lng:-106.525550 },
-  { nombre:"Palapa",   lat:29.071020, lng:-106.525750 },
-  { nombre:"Cabaña 4", lat:29.070900, lng:-106.525600 },
-  { nombre:"Cabaña 5", lat:29.070730, lng:-106.525560 },
+  { nombre:"Cabaña 1",        lat:29.07093533868258,  lng:-106.5257364773789 },
+  { nombre:"Cabaña 2",        lat:29.07104796628211,  lng:-106.5256511057223 },
+  { nombre:"Cabaña 3",        lat:29.07113720367277,  lng:-106.5255748719946 },
+  { nombre:"Cabaña 4",        lat:29.07115856894422,  lng:-106.5254815940998 },
+  { nombre:"Palapa",          lat:29.07113396006834,  lng:-106.5258268234222 },
+  { nombre:"Tienda y terraza",lat:29.07111429041682,  lng:-106.5260084157972 },
 ];
 
 // ── Mapa con Leaflet + tile satelital de ESRI (sin API key) ──
 document.getElementById('mapa').style.height = '520px';
 const map = L.map('mapa', {
-  center: [29.071100, -106.525550],
+  center: [29.07107, -106.52572],
   zoom: 19,
   zoomControl: true,
 });
